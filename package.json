@@ -1,12 +1,12 @@
 {
   "name": "cfn-stack-event-stream",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A readable stream of CloudFormation stack events",
   "main": "index.js",
   "scripts": {
     "test": "tap test.js"
   },
-  "author": "John Firebaugh <john@mapbox.com>s",
+  "author": "John Firebaugh <john@mapbox.com>",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.0.0-rc13"
