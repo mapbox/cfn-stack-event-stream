@@ -18,7 +18,7 @@ cfn.createStack({
             console.log(e.ResourceStatus, e.ResourceType, e.ResourceStatusReason);
         })
         .on('end', function() {
-            cfn.describeStack({StackName: 'my-stack'}, function(err, data) {
+            cfn.describeStacks({StackName: 'my-stack'}, function(err, data) {
                 if (err) throw err;
                 console.log('Result: ' + data.Stacks[0].StackStatus);
             });
