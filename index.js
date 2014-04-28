@@ -4,13 +4,16 @@ module.exports = function(cfn, stackName, options) {
     options = options || {};
 
     var stream = new Readable({objectMode: true}),
-        since = options.since || new Date(),
         pollInterval = options.pollInterval || 1000,
         describing = false,
         complete = false,
         seen = {},
         events = [],
         push = stream.push.bind(stream);
+
+    if (options.lastEventId) {
+        seen[options.lastEventId] = true;
+    }
 
     stream._read = function() {
         if (describing || complete) return;
@@ -28,9 +31,9 @@ module.exports = function(cfn, stackName, options) {
                 var event = data.StackEvents[i];
 
                 // Assuming StackEvents are in strictly reverse chronological order.
-                // If we get to what we've seen already, or to old events, we don't
-                // need to go on to the next page.
-                if (event.Timestamp < since || seen[event.EventId])
+                // If we get to what we've seen already we don't need to go on to the
+                // next page.
+                if (seen[event.EventId])
                     break;
 
                 events.push(event);

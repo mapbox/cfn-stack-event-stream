@@ -16,15 +16,14 @@ test('emits an error for a non-existent stack', function (t) {
 
 test('streams events until stack is complete', {timeout: 60000}, function (t) {
     var events = [],
-        since = new Date(),
-        stackName = 'cfn-stack-event-stream-test';
+        stackName = 'cfn-stack-event-stream-test-create';
 
     cfn.createStack({
         StackName: stackName,
         TemplateBody: JSON.stringify(template)
     }, function (err) {
         assert.ifError(err);
-        Stream(cfn, stackName, {since: since})
+        Stream(cfn, stackName)
             .on('data', function (e) {
                 events.push(e);
             })
