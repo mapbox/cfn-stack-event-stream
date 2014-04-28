@@ -25,3 +25,20 @@ cfn.createStack({
         });
 });
 ```
+
+## API
+
+### `EventStream(cfn, stackName, options)`
+
+Returns an object-mode [readable stream](http://nodejs.org/api/stream.html#stream_class_stream_readable)
+which emits `StackEvent` objects as returned by [`describeStackEvents`](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CloudFormation.html#describeStackEvents-property)
+
+Required parameters:
+
+* `cfn`: An [`AWS::CloudFormation`](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CloudFormation.html) instance.
+* `stackName`: The name of the stack.
+
+Options:
+
+* `lastEventId`: The `EventId` of a `StackEvent`. StackEvents emitted by the resulting stream
+   are guaranteed not to include this event or any preceding events.
