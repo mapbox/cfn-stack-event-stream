@@ -36,7 +36,8 @@ which emits `StackEvent` objects as returned by [`describeStackEvents`](http://d
 Required parameters:
 
 * `cfn`: An [`AWS::CloudFormation`](http://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CloudFormation.html) instance.
-* `stackName`: The name of the stack.
+* `stackName`: The name or ARN of the stack. Note that if you are reading events for a stack that is deleted or in the
+  process of being deleted, you need to pass the full ARN rather than the stackName.
 
 Options:
 

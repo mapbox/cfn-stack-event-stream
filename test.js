@@ -43,6 +43,38 @@ test('streams events until stack is complete', {timeout: 60000}, function (t) {
     });
 });
 
+test('streams events during stack deletion', {timeout: 60000}, function (t) {
+    var events = [],
+        stackName = 'cfn-stack-event-stream-test-delete',
+        lastEventId;
+
+    cfn.createStack({
+        StackName: stackName,
+        TemplateBody: JSON.stringify(template)
+    }, function (err, stack) {
+        assert.ifError(err);
+        Stream(cfn, stackName)
+            .on('data', function (e) {
+                lastEventId = e.EventId;
+            })
+            .on('end', function () {
+                cfn.deleteStack({StackName: stackName}, function(err) {
+                    assert.ifError(err);
+                    Stream(cfn, stack.StackId, {lastEventId: lastEventId})
+                        .on('data', function (e) {
+                            events.push(e);
+                        })
+                        .on('end', function () {
+                            assert.deepEqual(events.map(function (e) { return e.ResourceStatus; }), [
+                                'DELETE_COMPLETE'
+                            ]);
+                            t.end();
+                        });
+                });
+            });
+    });
+});
+
 var template = {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "cfn-stack-event-stream-test",
