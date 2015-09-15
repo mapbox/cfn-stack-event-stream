@@ -9,7 +9,7 @@
   "author": "John Firebaugh <john@mapbox.com>",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.0.0-rc13"
+    "aws-sdk": "^2.2.0"
   },
   "devDependencies": {
     "tap": "^0.4.8"
