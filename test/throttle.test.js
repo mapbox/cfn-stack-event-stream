@@ -6,7 +6,7 @@ var cfn = new AWS.CloudFormation({region: 'us-east-1'});
 
 test('handles throttle events', {timeout: 60000}, function (assert) {
     var events = [],
-        errors = [],
+        managed = [],
         stackName = 'cfn-stack-event-stream-test-throttle';
 
     cfn.createStack({
@@ -21,16 +21,13 @@ test('handles throttle events', {timeout: 60000}, function (assert) {
         }, 100);
 
         Stream(cfn, stackName)
-            .on('error', function(err) {
-                assert.ok(err, 'event on "error"');
-                errors.push(err);
-                // Throttling's been triggered, back off.
-                if (err.code === 'Throttling') {
-                    clearInterval(interval);
-                }
+            .on('managedError', function(err) {
+                assert.ok(err, 'managedError');
+                managed.push(err);
+                clearInterval(interval);
             })
             .on('data', function (e) {
-                assert.ok(e, 'event on "data"');
+                assert.ok(e, 'data');
                 events.push(e);
             })
             .on('end', function () {
@@ -43,7 +40,7 @@ test('handles throttle events', {timeout: 60000}, function (assert) {
                         'DELETE_COMPLETE',
                         'ROLLBACK_COMPLETE'
                     ]);
-                    assert.equal(errors.length > 0, true);
+                    assert.equal(managed.length > 0, true);
                     assert.end();
                 });
             });
