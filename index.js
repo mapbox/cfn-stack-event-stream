@@ -25,7 +25,12 @@ module.exports = function(cfn, stackName, options) {
         cfn.describeStackEvents({StackName: stackName, NextToken: nextToken}, function(err, data) {
             describing = false;
 
-            if (err) return stream.emit('error', err);
+            if (err) {
+                stream.emit('error', err);
+                return err.retryable ? setTimeout(function() {
+                    describeEvents(nextToken);
+                }, 5000) : null;
+            }
 
             for (var i = 0; i < data.StackEvents.length; i++) {
                 var event = data.StackEvents[i];
@@ -60,7 +65,12 @@ module.exports = function(cfn, stackName, options) {
         cfn.describeStacks({StackName: stackName}, function(err, data) {
             describing = false;
 
-            if (err) return stream.emit('error', err);
+            if (err) {
+                stream.emit('error', err);
+                return err.retryable ? setTimeout(function() {
+                    describeStack();
+                }, 5000) : null;
+            }
 
             if (/COMPLETE$/.test(data.Stacks[0].StackStatus)) {
                 complete = true;

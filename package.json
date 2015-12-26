@@ -4,7 +4,7 @@
   "description": "A readable stream of CloudFormation stack events",
   "main": "index.js",
   "scripts": {
-    "test": "tap test.js"
+    "test": "tape test/*.test.js"
   },
   "author": "John Firebaugh <john@mapbox.com>",
   "license": "ISC",
@@ -12,6 +12,6 @@
     "aws-sdk": "^2.0.0-rc13"
   },
   "devDependencies": {
-    "tap": "^0.4.8"
+    "tape": "~4.4.0"
   }
 }
