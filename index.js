@@ -25,12 +25,7 @@ module.exports = function(cfn, stackName, options) {
         cfn.describeStackEvents({StackName: stackName, NextToken: nextToken}, function(err, data) {
             describing = false;
 
-            if (err && err.retryable) {
-                stream.emit('managedError', err);
-                return setTimeout(function() { describeEvents(nextToken); }, 5000);
-            } else if (err) {
-                return stream.emit('error', err);
-            }
+            if (err) return stream.emit('error', err);
 
             for (var i = 0; i < data.StackEvents.length; i++) {
                 var event = data.StackEvents[i];
@@ -57,6 +52,10 @@ module.exports = function(cfn, stackName, options) {
                 events.reverse().forEach(push);
                 events = [];
             }
+        }).on('retry', function(res) {
+            // Force a minimum 5s retry delay.
+            res.error.retryDelay = Math.max(5000, res.error.retryDelay||5000);
+            stream.emit('retry', res.error);
         });
     }
 
@@ -65,12 +64,7 @@ module.exports = function(cfn, stackName, options) {
         cfn.describeStacks({StackName: stackName}, function(err, data) {
             describing = false;
 
-            if (err && err.retryable) {
-                stream.emit('managedError', err);
-                return setTimeout(function() { describeStack(); }, 5000);
-            } else if (err) {
-                return stream.emit('error', err);
-            }
+            if (err) return stream.emit('error', err);
 
             if (/COMPLETE$/.test(data.Stacks[0].StackStatus)) {
                 complete = true;
@@ -78,6 +72,10 @@ module.exports = function(cfn, stackName, options) {
             } else {
                 setTimeout(describeEvents, pollInterval);
             }
+        }).on('retry', function(res) {
+            // Force a minimum 5s retry delay.
+            res.error.retryDelay = Math.max(5000, res.error.retryDelay||5000);
+            stream.emit('retry', res.error);
         });
     }
 

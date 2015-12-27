@@ -21,8 +21,8 @@ test('handles throttle events', {timeout: 60000}, function (assert) {
         }, 100);
 
         Stream(cfn, stackName)
-            .on('managedError', function(err) {
-                assert.ok(err, 'managedError');
+            .on('retry', function(err) {
+                assert.ok(err, 'retry');
                 managed.push(err);
                 clearInterval(interval);
             })
