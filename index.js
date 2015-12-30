@@ -52,6 +52,10 @@ module.exports = function(cfn, stackName, options) {
                 events.reverse().forEach(push);
                 events = [];
             }
+        }).on('retry', function(res) {
+            // Force a minimum 5s retry delay.
+            res.error.retryDelay = Math.max(5000, res.error.retryDelay||5000);
+            stream.emit('retry', res.error);
         });
     }
 
@@ -68,6 +72,10 @@ module.exports = function(cfn, stackName, options) {
             } else {
                 setTimeout(describeEvents, pollInterval);
             }
+        }).on('retry', function(res) {
+            // Force a minimum 5s retry delay.
+            res.error.retryDelay = Math.max(5000, res.error.retryDelay||5000);
+            stream.emit('retry', res.error);
         });
     }
 

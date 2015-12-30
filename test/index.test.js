@@ -1,20 +1,19 @@
-var test = require('tap').test;
-var assert = require('assert');
-var Stream = require('./.');
+var test = require('tape');
+var Stream = require('../.');
 var AWS = require('aws-sdk');
 
 var cfn = new AWS.CloudFormation({region: 'us-east-1'});
 
-test('emits an error for a non-existent stack', function (t) {
+test('emits an error for a non-existent stack', function (assert) {
     Stream(cfn, 'cfn-stack-event-stream-test')
         .on('data', function (e) {})
         .on('error', function (err) {
             assert.ok(err);
-            t.end();
+            assert.end();
         });
 });
 
-test('streams events until stack is complete', {timeout: 60000}, function (t) {
+test('streams events until stack is complete', {timeout: 60000}, function (assert) {
     var events = [],
         stackName = 'cfn-stack-event-stream-test-create';
 
@@ -37,13 +36,13 @@ test('streams events until stack is complete', {timeout: 60000}, function (t) {
                         'DELETE_COMPLETE',
                         'ROLLBACK_COMPLETE'
                     ]);
-                    t.end();
+                    assert.end();
                 });
             });
     });
 });
 
-test('streams events during stack deletion', {timeout: 60000}, function (t) {
+test('streams events during stack deletion', {timeout: 60000}, function (assert) {
     var events = [],
         stackName = 'cfn-stack-event-stream-test-delete',
         lastEventId;
@@ -66,9 +65,10 @@ test('streams events during stack deletion', {timeout: 60000}, function (t) {
                         })
                         .on('end', function () {
                             assert.deepEqual(events.map(function (e) { return e.ResourceStatus; }), [
+                                'DELETE_IN_PROGRESS',
                                 'DELETE_COMPLETE'
                             ]);
-                            t.end();
+                            assert.end();
                         });
                 });
             });
