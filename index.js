@@ -38,6 +38,14 @@ module.exports = function(cfn, stackName, options) {
 
                 events.push(event);
                 seen[event.EventId] = true;
+
+                // If we reach a user initiated event assume this event is the
+                // initiating event the caller intends to monitor.
+                if (event.LogicalResourceId === stackName &&
+                    event.ResourceType === 'AWS::CloudFormation::Stack' &&
+                    event.ResourceStatusReason === 'User Initiated') {
+                    break;
+                }
             }
 
             if (i === data.StackEvents.length && data.NextToken) {
