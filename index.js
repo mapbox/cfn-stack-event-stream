@@ -27,7 +27,7 @@ module.exports = function(cfn, stackName, options) {
 
             if (err) return stream.emit('error', err);
 
-            for (var i = 0; i < data.StackEvents.length; i++) {
+            for (var i = 0; i < (data.StackEvents || []).length; i++) {
                 var event = data.StackEvents[i];
 
                 // Assuming StackEvents are in strictly reverse chronological order.
