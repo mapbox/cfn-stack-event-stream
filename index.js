@@ -7,7 +7,7 @@ module.exports = function(cfn, stackName, options) {
         pollInterval = options.pollInterval || 1000,
         describing = false,
         complete = false,
-        stackId = false,
+        stackId = stackName,
         seen = {},
         events = [],
         push = stream.push.bind(stream);
@@ -72,7 +72,7 @@ module.exports = function(cfn, stackName, options) {
 
     function describeStack() {
         describing = true;
-        cfn.describeStacks({StackName: stackName}, function(err, data) {
+        cfn.describeStacks({StackName: stackId}, function(err, data) {
             describing = false;
 
             if (err) return stream.emit('error', err);
