@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file. For change 
 
 Keep future unreleased changes here
 
+## 0.0.7 2016-08-11
+
+### Fixed
+
+- Doubletap
+
 ## 0.0.6 2016-08-11
 
 ### Fixed
