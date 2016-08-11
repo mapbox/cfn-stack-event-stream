@@ -51,7 +51,7 @@ module.exports = function(cfn, stackName, options) {
                 }
             }
 
-            if (i === data.StackEvents.length && data.NextToken) {
+            if (i === (data.StackEvents || []).length && data.NextToken) {
                 describeEvents(data.NextToken);
 
             } else if (complete) {
