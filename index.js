@@ -7,6 +7,7 @@ module.exports = function(cfn, stackName, options) {
         pollInterval = options.pollInterval || 1000,
         describing = false,
         complete = false,
+        stackId = stackName,
         seen = {},
         events = [],
         push = stream.push.bind(stream);
@@ -17,12 +18,14 @@ module.exports = function(cfn, stackName, options) {
 
     stream._read = function() {
         if (describing || complete) return;
-        describeEvents();
+        describeStack();
     };
 
     function describeEvents(nextToken) {
         describing = true;
-        cfn.describeStackEvents({StackName: stackName, NextToken: nextToken}, function(err, data) {
+        // Describe stacks using stackId (ARN) as CF stacks are actually
+        // not unique by name.
+        cfn.describeStackEvents({StackName: stackId, NextToken: nextToken}, function(err, data) {
             describing = false;
 
             if (err) return stream.emit('error', err);
@@ -69,10 +72,13 @@ module.exports = function(cfn, stackName, options) {
 
     function describeStack() {
         describing = true;
-        cfn.describeStacks({StackName: stackName}, function(err, data) {
+        cfn.describeStacks({StackName: stackId}, function(err, data) {
             describing = false;
 
             if (err) return stream.emit('error', err);
+            if (!data.Stacks.length) return stream.emit('error', new Error('Could not describe stack: ' + stackName));
+
+            stackId = data.Stacks[0].StackId;
 
             if (/COMPLETE$/.test(data.Stacks[0].StackStatus)) {
                 complete = true;
