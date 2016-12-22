@@ -1,5 +1,5 @@
 {
-  "name": "cfn-stack-event-stream",
+  "name": "@mapbox/cfn-stack-event-stream",
   "version": "0.0.7",
   "description": "A readable stream of CloudFormation stack events",
   "main": "index.js",
