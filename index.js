@@ -29,73 +29,77 @@ module.exports = function(cfn, stackName, options) {
     describing = true;
     // Describe stacks using stackId (ARN) as CF stacks are actually
     // not unique by name.
-    cfn.describeStackEvents({ StackName: stackId, NextToken: nextToken }, (err, data) => {
-      describing = false;
+    setTimeout(() => {
+      cfn.describeStackEvents({ StackName: stackId, NextToken: nextToken }, (err, data) => {
+        describing = false;
 
-      if (err) return stream.emit('error', err);
+        if (err) return stream.emit('error', err);
 
-      let i;
-      for (i = 0; i < (data.StackEvents || []).length; i++) {
-        const event = data.StackEvents[i];
+        let i;
+        for (i = 0; i < (data.StackEvents || []).length; i++) {
+          const event = data.StackEvents[i];
 
-        // Assuming StackEvents are in strictly reverse chronological order.
-        // If we get to what we've seen already we don't need to go on to the
-        // next page.
-        if (seen[event.EventId])
-          break;
+          // Assuming StackEvents are in strictly reverse chronological order.
+          // If we get to what we've seen already we don't need to go on to the
+          // next page.
+          if (seen[event.EventId])
+            break;
 
-        events.push(event);
-        seen[event.EventId] = true;
+          events.push(event);
+          seen[event.EventId] = true;
 
-        // If we reach a user initiated event assume this event is the
-        // initiating event the caller intends to monitor.
-        if (event.LogicalResourceId === stackName &&
-                    event.ResourceType === 'AWS::CloudFormation::Stack' &&
-                    event.ResourceStatusReason === 'User Initiated') {
-          break;
+          // If we reach a user initiated event assume this event is the
+          // initiating event the caller intends to monitor.
+          if (event.LogicalResourceId === stackName &&
+            event.ResourceType === 'AWS::CloudFormation::Stack' &&
+            event.ResourceStatusReason === 'User Initiated') {
+            break;
+          }
         }
-      }
 
-      if (i === (data.StackEvents || []).length && data.NextToken) {
-        describeEvents(data.NextToken);
+        if (i === (data.StackEvents || []).length && data.NextToken) {
+          describeEvents(data.NextToken);
 
-      } else if (complete) {
-        events.reverse().forEach(push);
-        push(null);
+        } else if (complete) {
+          events.reverse().forEach(push);
+          push(null);
 
-      } else {
-        describeStack();
-        events.reverse().forEach(push);
-        events = [];
-      }
-    }).on('retry', (res) => {
-      // Force a minimum 5s retry delay.
-      res.error.retryDelay = Math.max(5000, res.error.retryDelay || 5000);
-      stream.emit('retry', res.error);
-    });
+        } else {
+          describeStack();
+          events.reverse().forEach(push);
+          events = [];
+        }
+      }).on('retry', (res) => {
+        // Force a minimum 5s retry delay.
+        res.error.retryDelay = Math.max(5000, res.error.retryDelay || 5000);
+        stream.emit('retry', res.error);
+      });
+    }, 10000);
   }
 
   function describeStack() {
     describing = true;
-    cfn.describeStacks({ StackName: stackId }, (err, data) => {
-      describing = false;
+    setTimeout(() => {
+      cfn.describeStacks({ StackName: stackId }, (err, data) => {
+        describing = false;
 
-      if (err) return stream.emit('error', err);
-      if (!data.Stacks.length) return stream.emit('error', new Error('Could not describe stack: ' + stackName));
+        if (err) return stream.emit('error', err);
+        if (!data.Stacks.length) return stream.emit('error', new Error('Could not describe stack: ' + stackName));
 
-      stackId = data.Stacks[0].StackId;
+        stackId = data.Stacks[0].StackId;
 
-      if (/COMPLETE$/.test(data.Stacks[0].StackStatus)) {
-        complete = true;
-        describeEvents();
-      } else {
-        setTimeout(describeEvents, pollInterval);
-      }
-    }).on('retry', (res) => {
-      // Force a minimum 5s retry delay.
-      res.error.retryDelay = Math.max(5000, res.error.retryDelay || 5000);
-      stream.emit('retry', res.error);
-    });
+        if (/COMPLETE$/.test(data.Stacks[0].StackStatus)) {
+          complete = true;
+          describeEvents();
+        } else {
+          setTimeout(describeEvents, pollInterval);
+        }
+      }).on('retry', (res) => {
+        // Force a minimum 5s retry delay.
+        res.error.retryDelay = Math.max(5000, res.error.retryDelay || 5000);
+        stream.emit('retry', res.error);
+      });
+    }, 5000);
   }
 
   return stream;
