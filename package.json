@@ -1,6 +1,6 @@
 {
   "name": "cfn-stack-event-stream",
-  "version": "0.0.7",
+  "version": "1.0.0",
   "description": "A readable stream of CloudFormation stack events",
   "main": "index.js",
   "scripts": {
