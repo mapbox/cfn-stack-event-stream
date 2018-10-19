@@ -26,6 +26,7 @@ module.exports = function(cfn, stackName, options) {
   };
 
   function describeEvents(nextToken) {
+    if (describing) return;
     describing = true;
     // Describe stacks using stackId (ARN) as CF stacks are actually
     // not unique by name.
@@ -66,7 +67,6 @@ module.exports = function(cfn, stackName, options) {
       else if (complete) {
         events.reverse().forEach(push);
         push(null);
-
       }
 
       // The update is not complete, and there aren't any new events or more
@@ -85,6 +85,7 @@ module.exports = function(cfn, stackName, options) {
   }
 
   function describeStack() {
+    if (describing) return;
     describing = true;
     cfn.describeStacks({ StackName: stackId }, (err, data) => {
       describing = false;
